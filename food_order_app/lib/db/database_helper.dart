@@ -1,6 +1,5 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
 import '../models/user_model.dart';
 
 class DatabaseHelper {
@@ -53,5 +52,48 @@ class DatabaseHelper {
       return UserModel.fromMap(maps.first);
     }
     return null;
+  }
+
+  Future<bool> checkEmailExists(String email) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    return maps.isNotEmpty;
+  }
+
+  Future<int> updateUser(UserModel user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+    );
+  }
+
+  Future<int> deleteUser(int id) async {
+    final db = await database;
+    return await db.delete(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<UserModel>> getAllUsers() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('users');
+    return List.generate(maps.length, (i) => UserModel.fromMap(maps[i]));
+  }
+
+  Future<void> close() async {
+    if (_database != null) {
+      final db = await database;
+      await db.close();
+      _database = null;
+    }
   }
 }

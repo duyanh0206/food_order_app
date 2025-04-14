@@ -1,7 +1,7 @@
 class AppImage {
   final String path;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   const AppImage({
     required this.path,
