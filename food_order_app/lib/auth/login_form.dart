@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_order_app/auth/rive_login_animation.dart';
 import 'package:food_order_app/auth/signup_screen.dart';
+import 'package:food_order_app/screens/home/home_screen.dart';
 
 
 class LoginForm extends StatefulWidget {
@@ -51,32 +52,73 @@ class _LoginFormState extends State<LoginForm> {
     // No animation needed for password changes
   }
 
-  void _onLogin() {
-    if (!_formKey.currentState!.validate()) {
-      _riveController?.setWrongInput(true);
-      return;
-    }
-
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    setState(() => _isLoading = true);
-
-    Future.delayed(const Duration(seconds: 1), () {
-      if (email == 'test@example.com' && password == 'password123') {
-        _riveController?.setSuccess();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login Successful!')),
-        );
-      } else {
-        _riveController?.setFail();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login Failed!')),
-        );
-      }
-      setState(() => _isLoading = false);
-    });
+  Future<void> _onLogin() async {
+  if (!_formKey.currentState!.validate()) {
+    _riveController?.setWrongInput(true);
+    return;
   }
+
+  final email = _emailController.text.trim();
+  final password = _passwordController.text;
+
+  setState(() => _isLoading = true);
+
+  try {
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (email == 'test@example.com' && password == 'password123') {
+      _riveController?.setSuccess();
+      
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login Successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (!mounted) return;
+
+      // Navigate to home screen and remove all previous routes
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } else {
+      _riveController?.setFail();
+      
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid email or password!'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  } catch (e) {
+    if (!mounted) return;
+    
+    _riveController?.setFail();
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login failed: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  } finally {
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
