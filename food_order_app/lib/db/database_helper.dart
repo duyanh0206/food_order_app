@@ -1,99 +1,72 @@
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import '../models/user_model.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  factory DatabaseHelper() => _instance;
-  DatabaseHelper._internal();
-
+  static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+
+  DatabaseHelper._init();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await initDB();
+    _database = await _initDB('food_order.db');
     return _database!;
   }
 
-  Future<Database> initDB() async {
+  Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'food_order.db');
+    final path = join(dbPath, filePath);
 
     return await openDatabase(
       path,
       version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            email TEXT UNIQUE,
-            password TEXT
-          )
-        ''');
-      },
+      onCreate: _createDB,
     );
   }
 
-  Future<int> insertUser(UserModel user) async {
+  Future<void> _createDB(Database db, int version) async {
+    const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    const textType = 'TEXT NOT NULL';
+
+    await db.execute('''
+      CREATE TABLE users (
+        id $idType,
+        name $textType,
+        email $textType UNIQUE,
+        password $textType,
+        phone $textType,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    ''');
+  }
+
+  Future<void> createUser(UserModel user) async {
     final db = await database;
-    return await db.insert('users', user.toMap());
+    await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<UserModel?> getUser(String email, String password) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
+
+    final maps = await db.query(
       'users',
       where: 'email = ? AND password = ?',
       whereArgs: [email, password],
     );
 
-    if (maps.isNotEmpty) {
-      return UserModel.fromMap(maps.first);
-    }
-    return null;
-  }
+    if (maps.isEmpty) return null;
 
-  Future<bool> checkEmailExists(String email) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'users',
-      where: 'email = ?',
-      whereArgs: [email],
-    );
-    return maps.isNotEmpty;
-  }
-
-  Future<int> updateUser(UserModel user) async {
-    final db = await database;
-    return await db.update(
-      'users',
-      user.toMap(),
-      where: 'id = ?',
-      whereArgs: [user.id],
-    );
-  }
-
-  Future<int> deleteUser(int id) async {
-    final db = await database;
-    return await db.delete(
-      'users',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<List<UserModel>> getAllUsers() async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('users');
-    return List.generate(maps.length, (i) => UserModel.fromMap(maps[i]));
+    return UserModel.fromMap(maps.first);
   }
 
   Future<void> close() async {
-    if (_database != null) {
-      final db = await database;
-      await db.close();
-      _database = null;
-    }
+    final db = await database;
+    await db.close();
+    _database = null;
   }
 }

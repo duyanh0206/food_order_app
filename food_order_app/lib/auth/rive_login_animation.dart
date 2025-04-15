@@ -194,7 +194,7 @@ class BearAnimationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 250,
+      height: 200,
       child: Center(
         child: artboard == null
             ? const CircularProgressIndicator()
