@@ -127,6 +127,29 @@ class _LoginFormState extends State<LoginForm> {
         setState(() => _isLoading = false);
       }
     }
+
+    try {
+      // ...existing validation code...
+
+      final user = await DatabaseHelper.instance.getUser(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      if (user != null) {
+        final success = await DatabaseHelper.instance.setCurrentUserId(user.id!);
+        debugPrint('Login successful, user ID saved: $success');
+        widget.onLoginSuccess?.call();
+      } else {
+        debugPrint('Login failed: User not found');
+        // Show error message
+      }
+    } catch (e) {
+      debugPrint('Login error: $e');
+      // Show error message
+    }
   }
 
   @override

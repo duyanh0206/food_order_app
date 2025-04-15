@@ -3,12 +3,14 @@ class UserModel {
   final String name;
   final String email;
   final String password;
+  final DateTime? createdAt;
 
-  const UserModel({
+  UserModel({
     this.id,
     required this.name,
     required this.email,
     required this.password,
+    this.createdAt,
   });
 
   Map<String, dynamic> toMap() {
@@ -25,6 +27,7 @@ class UserModel {
       name: map['name'] as String,
       email: map['email'] as String,
       password: map['password'] as String,
+      createdAt: DateTime.parse(map['created_at'] as String),
     );
   }
 
@@ -33,12 +36,14 @@ class UserModel {
     String? name,
     String? email,
     String? password,
+    DateTime? createdAt,
   }) {
     return UserModel(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       password: password ?? this.password,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

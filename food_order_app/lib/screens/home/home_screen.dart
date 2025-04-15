@@ -3,6 +3,7 @@ import 'package:food_order_app/screens/cart/cart_screen.dart';
 import 'package:food_order_app/screens/notification/notification_screen.dart';
 import 'package:food_order_app/screens/order_history/order_history_screen.dart';
 import 'package:food_order_app/screens/profile/profile_screen.dart';
+import 'package:food_order_app/screens/home/home_form.dart'; // Add this import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,13 +15,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  // Tạo một widget riêng cho trang Home
-  static const List<Widget> _pages = [
-    Center(child: Text('Home Page')), // Thay thế HomeScreen() tạm thời
-    NotificationScreen(),
-    CartScreen(),
-    OrderHistoryScreen(),
-    ProfileScreen(),
+  // Update the pages list to use HomeForm
+  final List<Widget> _pages = [
+    const HomeForm(), // Replace HomePage with HomeForm
+    const NotificationScreen(),
+    const CartScreen(),
+    const OrderHistoryScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         selectedItemColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.white,
         onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
