@@ -5,7 +5,12 @@ import 'package:food_order_app/screens/home/home_screen.dart';
 import 'package:food_order_app/db/database_helper.dart';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+  final VoidCallback? onLoginSuccess;
+  
+  const LoginForm({
+    super.key,
+    this.onLoginSuccess,
+  });
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -89,6 +94,9 @@ class _LoginFormState extends State<LoginForm> {
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
+
+        // Call the success callback
+        widget.onLoginSuccess?.call();
       } else {
         _riveController?.setFail();
         

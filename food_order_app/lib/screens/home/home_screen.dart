@@ -14,8 +14,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
+  // Tạo một widget riêng cho trang Home
   static const List<Widget> _pages = [
-    HomeScreen(),
+    Center(child: Text('Home Page')), // Thay thế HomeScreen() tạm thời
     NotificationScreen(),
     CartScreen(),
     OrderHistoryScreen(),

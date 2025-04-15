@@ -5,6 +5,29 @@ import 'package:food_order_app/auth/rive_login_animation.dart';
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
 
+  Future<void> _handleSignupSuccess(BuildContext context) async {
+    try {
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Registration successful!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      // Wait for animation
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      if (!context.mounted) return;
+      
+      // Navigate to login
+      Navigator.of(context).pushReplacementNamed('/login');
+    } catch (e) {
+      debugPrint('Navigation error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,7 +42,7 @@ class SignupScreen extends StatelessWidget {
             ),
             child: RiveLoginAnimationWrapper(
               child: SignupForm(
-                onSignupSuccess: () => Navigator.of(context).pushReplacementNamed('/login'),
+                onSignupSuccess: () => _handleSignupSuccess(context),
               ),
             ),
           ),

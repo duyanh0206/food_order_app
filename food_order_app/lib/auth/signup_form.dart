@@ -211,14 +211,26 @@ class _SignupFormState extends State<SignupForm> {
                           controller: _confirmPasswordController,
                           focusNode: _confirmPasswordFocus,
                           obscureText: !_isPasswordVisible,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration( // Remove const
                             labelText: 'Confirm Password',
-                            border: OutlineInputBorder(
+                            border: const OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(12)),
                             ),
-                            contentPadding: EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 16,
+                            ),
+                            // Add suffix icon button
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                                _riveController?.setHandsUp(!_isPasswordVisible);
+                              },
                             ),
                           ),
                           validator: (value) {
@@ -293,30 +305,16 @@ class _SignupFormState extends State<SignupForm> {
         password: _passwordController.text.trim(),
       );
 
-      // Wrap database operation in catchError
-      await DatabaseHelper.instance.createUser(user)
-        .timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => throw TimeoutException('Database operation timed out'),
-        )
-        .catchError((error) {
-          throw Exception('Failed to create user: $error');
-        });
+      await DatabaseHelper.instance.createUser(user).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('Registration timed out'),
+      );
 
       if (!mounted) return;
 
       _riveController?.setSuccess();
       
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Registration successful!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      // Call the success callback
+      // Call the success callback instead of navigating directly
       widget.onSignupSuccess?.call();
 
     } catch (e) {
@@ -336,8 +334,7 @@ class _SignupFormState extends State<SignupForm> {
         ),
       );
       
-      debugPrint('Signup error: $e'); // Add logging for debugging
-      
+      debugPrint('Signup error: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
