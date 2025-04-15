@@ -91,7 +91,7 @@ class _SignupFormState extends State<SignupForm> {
                 const SizedBox(height: 20), // Reduced top spacing
                 Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 30),
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
                   decoration: BoxDecoration(
                     color: Colors.white,

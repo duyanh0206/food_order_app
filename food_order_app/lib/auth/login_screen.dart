@@ -7,22 +7,21 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xFFD9E2E9), // Match bear background color
-      body: RiveLoginAnimationWrapper(
-        child: SafeArea(
-          child: Column(
-            children: [
-              SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(children: [SizedBox(height: 24), LoginForm()]),
-                ),
-              ),
-            ],
+    return Scaffold(
+      backgroundColor: const Color(0xFFD9E2E9),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Form with animation
+          Padding(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top - 40, // Match signup's padding
+            ),
+            child: const RiveLoginAnimationWrapper(
+              child: LoginForm(),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
