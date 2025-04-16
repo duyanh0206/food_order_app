@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:food_order_app/auth/rive_login_animation.dart';
 import 'package:food_order_app/auth/signup_screen.dart';
-import 'package:food_order_app/screens/home/home_screen.dart';
 import 'package:food_order_app/db/database_helper.dart';
+import 'package:food_order_app/screens/home/home_screen.dart';
 
 class LoginForm extends StatefulWidget {
   final VoidCallback? onLoginSuccess;
-  
-  const LoginForm({
-    super.key,
-    this.onLoginSuccess,
-  });
+
+  const LoginForm({super.key, this.onLoginSuccess});
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -68,13 +65,13 @@ class _LoginFormState extends State<LoginForm> {
     try {
       final email = _emailController.text.trim();
       final password = _passwordController.text;
-      
+
       // Get user from database
       final user = await DatabaseHelper.instance.getUser(email, password);
-      
+
       if (user != null) {
         _riveController?.setSuccess();
-        
+
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +84,7 @@ class _LoginFormState extends State<LoginForm> {
 
         // Wait for animation
         await Future.delayed(const Duration(seconds: 2));
-        
+
         if (!mounted) return;
 
         Navigator.pushReplacement(
@@ -99,7 +96,7 @@ class _LoginFormState extends State<LoginForm> {
         widget.onLoginSuccess?.call();
       } else {
         _riveController?.setFail();
-        
+
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -112,7 +109,7 @@ class _LoginFormState extends State<LoginForm> {
       }
     } catch (e) {
       if (!mounted) return;
-      
+
       _riveController?.setFail();
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +136,9 @@ class _LoginFormState extends State<LoginForm> {
       if (!mounted) return;
 
       if (user != null) {
-        final success = await DatabaseHelper.instance.setCurrentUserId(user.id!);
+        final success = await DatabaseHelper.instance.setCurrentUserId(
+          user.id!,
+        );
         debugPrint('Login successful, user ID saved: $success');
         widget.onLoginSuccess?.call();
       } else {
@@ -204,10 +203,7 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               const Text(
                 'Login',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -229,12 +225,17 @@ class _LoginFormState extends State<LoginForm> {
                   final controller = RiveLoginAnimationController.of(context);
                   // Move eyes based on text length
                   if (value.isNotEmpty) {
-                    final progress = value.length / 20; // Adjust denominator based on expected max length
+                    final progress =
+                        value.length /
+                        20; // Adjust denominator based on expected max length
                     controller?.setLookDirection(progress);
                   }
                 },
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Please enter your email' : null,
+                validator:
+                    (value) =>
+                        (value == null || value.isEmpty)
+                            ? 'Please enter your email'
+                            : null,
               ),
               const SizedBox(height: 20),
 
@@ -254,7 +255,9 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
@@ -265,8 +268,11 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                 ),
                 onChanged: _onPasswordChanged,
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Please enter your password' : null,
+                validator:
+                    (value) =>
+                        (value == null || value.isEmpty)
+                            ? 'Please enter your password'
+                            : null,
                 onFieldSubmitted: (_) => _onLogin(),
               ),
               const SizedBox(height: 15),
@@ -290,10 +296,7 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                   child: const Text(
                     "Forgot Password?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
@@ -313,22 +316,23 @@ class _LoginFormState extends State<LoginForm> {
                     elevation: 0,
                   ),
                   onPressed: _isLoading ? null : _onLogin,
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        )
-                      : const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
               ),
               const SizedBox(height: 32),
@@ -339,30 +343,43 @@ class _LoginFormState extends State<LoginForm> {
                 children: [
                   const Text(
                     "Don't have an account? ",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.black87, fontSize: 14),
                   ),
                   TextButton(
-                    onPressed: _isLoading 
-                      ? null 
-                      : () {
-                          // Pop any existing snackbars
-                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          
-                          // Navigate with page route
-                          Navigator.of(context).push(
-                            PageRouteBuilder(
-                              pageBuilder: (context, animation, secondaryAnimation) => 
-                                const SignupScreen(),
-                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                return FadeTransition(opacity: animation, child: child);
-                              },
-                              transitionDuration: const Duration(milliseconds: 300),
-                            ),
-                          );
-                        },
+                    onPressed:
+                        _isLoading
+                            ? null
+                            : () {
+                              ScaffoldMessenger.of(
+                                context,
+                              ).hideCurrentSnackBar();
+
+                              // Navigate with page route
+                              Navigator.of(context).push(
+                                PageRouteBuilder(
+                                  pageBuilder:
+                                      (
+                                        context,
+                                        animation,
+                                        secondaryAnimation,
+                                      ) => const SignupScreen(),
+                                  transitionsBuilder: (
+                                    context,
+                                    animation,
+                                    secondaryAnimation,
+                                    child,
+                                  ) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    );
+                                  },
+                                  transitionDuration: const Duration(
+                                    milliseconds: 300,
+                                  ),
+                                ),
+                              );
+                            },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 0,
@@ -379,7 +396,7 @@ class _LoginFormState extends State<LoginForm> {
                         color: Colors.deepPurple,
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ],

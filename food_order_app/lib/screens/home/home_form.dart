@@ -3,6 +3,7 @@ import 'package:food_order_app/db/database_helper.dart';
 import 'package:food_order_app/screens/search/search_screen.dart';
 
 import 'food_menu_tabs.dart';
+import 'menu_best_seller.dart';
 import 'onboarding_banner.dart';
 
 class HomeForm extends StatefulWidget {
@@ -137,6 +138,11 @@ class _HomeFormState extends State<HomeForm> {
                 child: FoodMenuTabs(),
               ),
               const SizedBox(height: 16),
+              // Best Seller Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: MenuBestSeller(),
+              ),
             ],
           ),
         ),
