@@ -225,7 +225,14 @@ class _LoginFormState extends State<LoginForm> {
                     vertical: 16,
                   ),
                 ),
-                onChanged: _onEmailChanged,
+                onChanged: (value) {
+                  final controller = RiveLoginAnimationController.of(context);
+                  // Move eyes based on text length
+                  if (value.isNotEmpty) {
+                    final progress = value.length / 20; // Adjust denominator based on expected max length
+                    controller?.setLookDirection(progress);
+                  }
+                },
                 validator: (value) =>
                     (value == null || value.isEmpty) ? 'Please enter your email' : null,
               ),

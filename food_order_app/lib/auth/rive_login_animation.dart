@@ -88,9 +88,9 @@ class RiveLoginAnimationWrapperState extends State<RiveLoginAnimationWrapper>
         _numLook?.value = 0.0;
         _isHandsUp?.value = false;
         _isChecking?.value = false;
-      }
 
-      setState(() => _artboard = artboard);
+        setState(() => _artboard = artboard);
+      }
     } catch (e) {
       debugPrint('Error loading Rive file: $e');
     }
@@ -119,14 +119,9 @@ class RiveLoginAnimationWrapperState extends State<RiveLoginAnimationWrapper>
 
   @override
   void setLookDirection(double value) {
-    // Only move eyes during email input, not during other states
-    if (_numLook != null && 
-        !_isHandsUp!.value && 
-        !_isChecking!.value) {
-      final targetValue = value.clamp(0.0, 1.0);
-      if (_currentLookValue != targetValue) {
-        _animateLookValue(targetValue);
-      }
+    if (_numLook != null && !_isHandsUp!.value && !_isChecking!.value) {
+      _numLook!.value = value.clamp(0.0, 1.0);
+      _currentLookValue = value.clamp(0.0, 1.0);
     }
   }
 
@@ -153,10 +148,14 @@ class RiveLoginAnimationWrapperState extends State<RiveLoginAnimationWrapper>
 
   @override
   void setSuccess() {
-    _isChecking?.value = false;
-    _isHandsUp?.value = false;
-    _animateLookValue(0.0);
-    _trigSuccess?.fire();
+    if (_trigSuccess != null) {
+      _isChecking?.value = false;
+      _isHandsUp?.value = false;
+      _animateLookValue(0.0);
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _trigSuccess?.fire();
+      });
+    }
   }
 
   @override
