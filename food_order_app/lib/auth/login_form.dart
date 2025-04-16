@@ -152,6 +152,31 @@ class _LoginFormState extends State<LoginForm> {
     }
   }
 
+  Future<void> _handleSubmit() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        final user = await DatabaseHelper.instance.getUser(
+          _emailController.text,
+          _passwordController.text,
+        );
+
+        if (user != null && mounted) {
+          widget.onLoginSuccess?.call(); // Gọi callback khi login thành công
+        } else {
+          // Show error
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid email or password'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Login error: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

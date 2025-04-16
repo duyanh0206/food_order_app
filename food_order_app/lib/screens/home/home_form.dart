@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:food_order_app/db/database_helper.dart';
+import 'package:food_order_app/screens/search/search_screen.dart';
 
-class HomeForm extends StatefulWidget {  // Changed from HomePage to HomeForm
+class HomeForm extends StatefulWidget {
   const HomeForm({super.key});
 
   @override
-  State<HomeForm> createState() => _HomeFormState();  // Changed to _HomeFormState
+  State<HomeForm> createState() => _HomeFormState();
 }
 
-class _HomeFormState extends State<HomeForm> {  // Changed from _HomePageState
+class _HomeFormState extends State<HomeForm> {
   String _userName = '';
   bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUserName() async {
@@ -40,55 +48,83 @@ class _HomeFormState extends State<HomeForm> {  // Changed from _HomePageState
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with user name
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: _isLoading 
-              ? const CircularProgressIndicator()
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Hello, $_userName!',
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hello message first
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+              child: _isLoading 
+                ? const CircularProgressIndicator()
+                : Text(
+                    'Hello, $_userName!',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0,
+                      color: Colors.black,
                     ),
-                  ],
-                ),
-          ),
-          // Content area
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Add your content here
-                    const Text('Welcome to Food Order App'),
-                  ],
+                  ),
+            ),
+            // Craving message second
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+              child: const Text(
+                'What are you craving?',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: -1,
+                  color: Colors.black,
                 ),
               ),
             ),
-          ),
-        ],
+            // Search bar that navigates to search screen
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SearchScreen()),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.grey.shade600),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Search for food...',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+
+
+
+
+
+

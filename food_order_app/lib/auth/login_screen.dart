@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:food_order_app/auth/login_form.dart';
 import 'package:food_order_app/auth/rive_login_animation.dart';
-import 'package:food_order_app/screens/home/home_screen.dart'; // Add this import
+import 'package:food_order_app/screens/home/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -17,23 +17,24 @@ class LoginScreen extends StatelessWidget {
         ),
       );
 
-      // Short delay for animation and snackbar
+      // Wait for snackbar
       await Future.delayed(const Duration(milliseconds: 500));
       
       if (!context.mounted) return;
 
-      // Use pushReplacement instead of pushReplacementNamed
-      await Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      // Clear navigation stack and go to HomeScreen
+      await Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
+        (route) => false,
       );
-      
     } catch (e) {
-      debugPrint('Navigation error: $e');
+      debugPrint('Login navigation error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Navigation failed: ${e.toString()}'),
+            content: Text('Navigation error: $e'),
             backgroundColor: Colors.red,
           ),
         );

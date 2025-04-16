@@ -4,6 +4,7 @@ import 'package:food_order_app/screens/splash/splash.screen.dart';
 import 'package:food_order_app/auth/login_screen.dart';
 import 'package:food_order_app/auth/signup_screen.dart';
 import 'package:food_order_app/screens/home/home_screen.dart';
+import 'package:food_order_app/screens/search/search_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
