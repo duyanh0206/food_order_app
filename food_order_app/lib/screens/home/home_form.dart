@@ -137,7 +137,6 @@ class _HomeFormState extends State<HomeForm> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: FoodMenuTabs(),
               ),
-              const SizedBox(height: 16),
               // Best Seller Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
