@@ -1,16 +1,15 @@
+import 'dart:async'; // Add this import for TimeoutException
+
 import 'package:flutter/material.dart';
 import 'package:food_order_app/auth/rive_login_animation.dart';
 import 'package:food_order_app/db/database_helper.dart';
 import 'package:food_order_app/models/user_model.dart';
-import 'dart:async'; // Add this import for TimeoutException
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignupForm extends StatefulWidget {
   final VoidCallback? onSignupSuccess;
-  
-  const SignupForm({
-    super.key, 
-    this.onSignupSuccess,
-  });
+
+  const SignupForm({super.key, this.onSignupSuccess});
 
   @override
   State<SignupForm> createState() => _SignupFormState();
@@ -26,10 +25,11 @@ class _SignupFormState extends State<SignupForm> {
   final _emailFocus = FocusNode();
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
-  
+
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
+  // Access Rive controller for animations
   RiveController? get _riveController =>
       RiveLoginAnimationController.of(context);
 
@@ -57,7 +57,9 @@ class _SignupFormState extends State<SignupForm> {
   }
 
   void _handlePasswordFocusChange() {
-    _riveController?.setHandsUp(_passwordFocus.hasFocus || _confirmPasswordFocus.hasFocus);
+    _riveController?.setHandsUp(
+      _passwordFocus.hasFocus || _confirmPasswordFocus.hasFocus,
+    );
   }
 
   void _onNameChanged(String value) {
@@ -83,10 +85,12 @@ class _SignupFormState extends State<SignupForm> {
           child: Container(
             width: double.infinity,
             constraints: BoxConstraints(
-              minHeight: MediaQuery.of(context).size.height * 0.60, // Increase height
+              minHeight:
+                  MediaQuery.of(context).size.height * 0.60, // Increased height
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center content vertically
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Center content vertically
               children: [
                 const SizedBox(height: 20), // Reduced top spacing
                 Container(
@@ -121,6 +125,7 @@ class _SignupFormState extends State<SignupForm> {
                         ),
                         const SizedBox(height: 32),
 
+                        // Full Name Field
                         TextFormField(
                           controller: _nameController,
                           focusNode: _nameFocus,
@@ -128,7 +133,9 @@ class _SignupFormState extends State<SignupForm> {
                           decoration: const InputDecoration(
                             labelText: 'Full Name',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
                             ),
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 16,
@@ -136,11 +143,15 @@ class _SignupFormState extends State<SignupForm> {
                             ),
                           ),
                           onChanged: _onNameChanged,
-                          validator: (value) =>
-                              (value == null || value.isEmpty) ? 'Please enter your name' : null,
+                          validator:
+                              (value) =>
+                                  (value == null || value.isEmpty)
+                                      ? 'Please enter your name'
+                                      : null,
                         ),
                         const SizedBox(height: 16),
 
+                        // Email Field
                         TextFormField(
                           controller: _emailController,
                           focusNode: _emailFocus,
@@ -149,7 +160,9 @@ class _SignupFormState extends State<SignupForm> {
                           decoration: const InputDecoration(
                             labelText: 'Email',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
                             ),
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 16,
@@ -161,7 +174,9 @@ class _SignupFormState extends State<SignupForm> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your email';
                             }
-                            final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                            final emailRegExp = RegExp(
+                              r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                            );
                             if (!emailRegExp.hasMatch(value)) {
                               return 'Please enter a valid email';
                             }
@@ -170,6 +185,7 @@ class _SignupFormState extends State<SignupForm> {
                         ),
                         const SizedBox(height: 16),
 
+                        // Password Field
                         TextFormField(
                           controller: _passwordController,
                           focusNode: _passwordFocus,
@@ -177,7 +193,9 @@ class _SignupFormState extends State<SignupForm> {
                           decoration: InputDecoration(
                             labelText: 'Password',
                             border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -185,13 +203,17 @@ class _SignupFormState extends State<SignupForm> {
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
                               onPressed: () {
                                 setState(() {
                                   _isPasswordVisible = !_isPasswordVisible;
                                 });
-                                _riveController?.setHandsUp(!_isPasswordVisible);
+                                _riveController?.setHandsUp(
+                                  !_isPasswordVisible,
+                                );
                               },
                             ),
                           ),
@@ -207,29 +229,35 @@ class _SignupFormState extends State<SignupForm> {
                         ),
                         const SizedBox(height: 16),
 
+                        // Confirm Password Field
                         TextFormField(
                           controller: _confirmPasswordController,
                           focusNode: _confirmPasswordFocus,
                           obscureText: !_isPasswordVisible,
-                          decoration: InputDecoration( // Remove const
+                          decoration: InputDecoration(
                             labelText: 'Confirm Password',
                             border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(12)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(12),
+                              ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 16,
                             ),
-                            // Add suffix icon button
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                _isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                               ),
                               onPressed: () {
                                 setState(() {
                                   _isPasswordVisible = !_isPasswordVisible;
                                 });
-                                _riveController?.setHandsUp(!_isPasswordVisible);
+                                _riveController?.setHandsUp(
+                                  !_isPasswordVisible,
+                                );
                               },
                             ),
                           ),
@@ -246,6 +274,7 @@ class _SignupFormState extends State<SignupForm> {
                         ),
                         const SizedBox(height: 32),
 
+                        // Submit Button
                         SizedBox(
                           height: 56,
                           child: ElevatedButton(
@@ -258,22 +287,23 @@ class _SignupFormState extends State<SignupForm> {
                               elevation: 0,
                             ),
                             onPressed: _isLoading ? null : _onSignup,
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
+                            child:
+                                _isLoading
+                                    ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                    : const Text(
+                                      'Register',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  )
-                                : const Text(
-                                    'Register',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
                           ),
                         ),
                       ],
@@ -295,6 +325,14 @@ class _SignupFormState extends State<SignupForm> {
       return;
     }
 
+    // Save email to shared preferences
+    Future<void> _saveEmail(String email) async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('email', email);
+    }
+
+    await _saveEmail(_emailController.text.trim().toLowerCase());
+
     setState(() => _isLoading = true);
     FocusScope.of(context).unfocus();
 
@@ -305,35 +343,36 @@ class _SignupFormState extends State<SignupForm> {
         password: _passwordController.text.trim(),
       );
 
-      await DatabaseHelper.instance.createUser(user).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () => throw TimeoutException('Registration timed out'),
-      );
+      await DatabaseHelper.instance
+          .createUser(user)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw TimeoutException('Registration timed out'),
+          );
 
       if (!mounted) return;
 
       _riveController?.setSuccess();
-      
+
       // Call the success callback instead of navigating directly
       widget.onSignupSuccess?.call();
-
     } catch (e) {
       if (!mounted) return;
-      
+
       _riveController?.setFail();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            e is TimeoutException 
-                ? 'Registration timed out. Please try again.' 
-                : 'Registration failed: ${e.toString()}'
+            e is TimeoutException
+                ? 'Registration timed out. Please try again.'
+                : 'Registration failed: ${e.toString()}',
           ),
           backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
       );
-      
+
       debugPrint('Signup error: $e');
     } finally {
       if (mounted) {

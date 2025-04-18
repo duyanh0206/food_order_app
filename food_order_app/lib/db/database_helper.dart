@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+
 import '../models/user_model.dart';
 
 class DatabaseHelper {
@@ -12,7 +13,7 @@ class DatabaseHelper {
 
   DatabaseHelper._init();
 
-  // Initialize SharedPreferences
+  // Get SharedPreferences instance
   Future<SharedPreferences> get prefs async {
     _prefs ??= await SharedPreferences.getInstance();
     return _prefs!;
@@ -27,18 +28,20 @@ class DatabaseHelper {
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'food_order.db');
-    
-    // Debug database path
-    debugPrint('Database path: $path');
+
+    debugPrint('[DB] Database path: $path');
 
     return await openDatabase(
       path,
       version: 1,
       onCreate: _createDB,
       onOpen: (db) async {
-        // Debug table structure
-        final tables = await db.query('sqlite_master', where: 'type = ?', whereArgs: ['table']);
-        debugPrint('Database tables: ${tables.map((t) => t['name']).toList()}');
+        final tables = await db.query(
+          'sqlite_master',
+          where: 'type = ?',
+          whereArgs: ['table'],
+        );
+        debugPrint('[DB] Tables: ${tables.map((t) => t['name']).toList()}');
       },
     );
   }
@@ -53,92 +56,90 @@ class DatabaseHelper {
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
     ''');
-    debugPrint('Database tables created');
+    debugPrint('[DB] Table `users` created');
   }
 
+  // Create a new user
   Future<int> createUser(UserModel user) async {
     final db = await database;
     try {
       final userData = user.toMap();
       userData['email'] = userData['email'].toLowerCase();
-      
-      debugPrint('Creating user with data: $userData');
-      
+      debugPrint('[DB] Creating user: $userData');
+
       final id = await db.insert(
         'users',
         userData,
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
-      
-      // Verify user was created
+
       final createdUser = await db.query(
         'users',
         where: 'id = ?',
         whereArgs: [id],
       );
-      
-      debugPrint('Created user data: ${createdUser.first}');
-      
-      await setCurrentUserId(id);
+      debugPrint('[DB] Created user data: ${createdUser.first}');
+
+      await setCurrentUserId(id); // Set current user after creation
       return id;
     } catch (e) {
-      debugPrint('Error creating user: $e');
+      debugPrint('[DB] Error creating user: $e');
       rethrow;
     }
   }
 
+  // Login - get user by email & password
   Future<UserModel?> getUser(String email, String password) async {
     final db = await database;
     try {
-      debugPrint('Attempting login with email: $email');
-      
-      // Debug: List all users
-      final allUsers = await db.query('users');
-      debugPrint('All users in database: ${allUsers.length}');
-      
+      final emailLower = email.toLowerCase();
+      debugPrint('[DB] Attempt login: email=$emailLower');
+
       final List<Map<String, dynamic>> users = await db.query(
         'users',
         where: 'email = ? AND password = ?',
-        whereArgs: [email.toLowerCase(), password],
+        whereArgs: [emailLower, password],
       );
 
       if (users.isNotEmpty) {
         final user = UserModel.fromMap(users.first);
-        debugPrint('Found user: ${user.name}');
-        await setCurrentUserId(user.id!);
+        debugPrint('[DB] Login successful: ${user.name}');
+        await setCurrentUserId(user.id!); // Save current user
         return user;
+      } else {
+        debugPrint('[DB] No matching user found for email: $emailLower');
+        return null;
       }
-      
-      debugPrint('No user found for email: $email');
-      return null;
     } catch (e) {
-      debugPrint('Login error: $e');
+      debugPrint('[DB] Login error: $e');
       return null;
     }
   }
 
-  // Update setCurrentUserId method
+  // Save current user ID to SharedPreferences
   Future<bool> setCurrentUserId(int userId) async {
     try {
       final preferences = await prefs;
       final result = await preferences.setInt(_currentUserKey, userId);
-      debugPrint('Set current user ID: $userId, success: $result');
+      debugPrint(
+        '[SharedPrefs] Set current user ID: $userId, success: $result',
+      );
       return result;
     } catch (e) {
-      debugPrint('Error setting current user ID: $e');
+      debugPrint('[SharedPrefs] Error setting current user ID: $e');
       return false;
     }
   }
 
-  // Update getCurrentUser method
+  // Get current logged-in user
   Future<UserModel?> getCurrentUser() async {
     try {
       final preferences = await prefs;
       final userId = preferences.getInt(_currentUserKey);
-      debugPrint('Got current user ID: $userId');
-      
+      debugPrint('[SharedPrefs] Retrieved current user ID: $userId');
+
       if (userId == null) {
-        debugPrint('No current user ID found');
+        debugPrint('[SharedPrefs] No user ID found in prefs');
         return null;
       }
 
@@ -150,28 +151,31 @@ class DatabaseHelper {
         limit: 1,
       );
 
+      debugPrint('[DB] Query result: $maps');
+
       if (maps.isNotEmpty) {
-        debugPrint('Found user data for ID: $userId');
-        return UserModel.fromMap(maps.first);
+        final user = UserModel.fromMap(maps.first);
+        debugPrint('[DB] Found current user: ${user.name} (${user.email})');
+        return user;
+      } else {
+        debugPrint('[DB] No user found with ID: $userId');
+        return null;
       }
-      
-      debugPrint('No user found for ID: $userId');
-      return null;
     } catch (e) {
-      debugPrint('Error getting current user: $e');
+      debugPrint('[DB] Error getting current user: $e');
       return null;
     }
   }
 
-  // Update clearCurrentUser method
+  // Clear current user info
   Future<bool> clearCurrentUser() async {
     try {
       final preferences = await prefs;
       final result = await preferences.remove(_currentUserKey);
-      debugPrint('Cleared current user, success: $result');
+      debugPrint('[SharedPrefs] Cleared current user ID, success: $result');
       return result;
     } catch (e) {
-      debugPrint('Error clearing current user: $e');
+      debugPrint('[SharedPrefs] Error clearing current user: $e');
       return false;
     }
   }
@@ -181,6 +185,7 @@ class DatabaseHelper {
       final db = await database;
       await db.close();
       _database = null;
+      debugPrint('[DB] Database closed');
     }
   }
 }

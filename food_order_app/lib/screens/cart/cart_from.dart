@@ -11,13 +11,18 @@ class _CartFromState extends State<CartFrom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white70,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/cart1.png', fit: BoxFit.cover),
-            const SizedBox(width: 10),
+            IconButton(
+              icon: const Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
             const Text(
               'Food Order',
               style: TextStyle(

@@ -13,24 +13,33 @@ class UserModel {
     this.createdAt,
   });
 
+  // Chuyển đổi từ đối tượng UserModel thành Map để lưu vào DB
   Map<String, dynamic> toMap() {
     return {
       'name': name,
       'email': email,
       'password': password,
+      'created_at':
+          createdAt?.toIso8601String(), // Chuyển DateTime thành String (nếu có)
     };
   }
 
+  // Tạo đối tượng UserModel từ Map (khi lấy dữ liệu từ DB)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] as int,
+      id: map['id'] as int?,
       name: map['name'] as String,
       email: map['email'] as String,
       password: map['password'] as String,
-      createdAt: DateTime.parse(map['created_at'] as String),
+      // Xử lý nullable 'created_at'
+      createdAt:
+          map['created_at'] != null
+              ? DateTime.parse(map['created_at'] as String)
+              : null,
     );
   }
 
+  // Hàm copyWith để tạo đối tượng UserModel mới từ đối tượng hiện tại
   UserModel copyWith({
     int? id,
     String? name,
